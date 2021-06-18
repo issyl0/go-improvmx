@@ -17,7 +17,7 @@ func main() {
 	accessToken := os.Getenv("IMPROVMX_API_TOKEN")
 	improvmx.ListDomains(accessToken)
 	improvmx.CreateDomain(accessToken, "example.com")
-	improvmx.CreateEmailForward(accessToken, "example.com", "hi", "me@realdomain com")
+	improvmx.CreateEmailForward(accessToken, "example.com", "hi", "me@realdomain.com")
 	improvmx.DeleteEmailForward(accessToken, "example.com", "hello")
 	improvmx.DeleteDomain(accessToken, "example.com")
 }
