@@ -57,3 +57,65 @@ func ListDomains(accessToken string) bool {
 	}
 	return true
 }
+
+func CreateDomain(accessToken, domain string) bool {
+	client, _ := authorize(accessToken)
+
+	domainInput, err := json.Marshal(map[string]string{"domain": domain})
+	if err != nil {
+		fmt.Println("Couldn't convert string to JSON: %v", err)
+		return false
+	}
+
+	resp, err := client.SetBody(domainInput).Post("https://api.improvmx.com/v3/domains/")
+	if err != nil {
+		fmt.Printf("%v", err)
+		return false
+	}
+
+	fmt.Println(string(resp.Body()))
+	return true
+}
+
+func DeleteDomain(accessToken, domain string) bool {
+	client, _ := authorize(accessToken)
+
+	resp, err := client.Delete(fmt.Sprintf("https://api.improvmx.com/v3/domains/%s", domain))
+	if err != nil {
+		fmt.Printf("Couldn't delete domain, got error %v", err)
+		return false
+	}
+
+	fmt.Println(string(resp.Body()))
+	return true
+}
+
+func CreateEmailForward(accessToken, domain, alias, forward string) bool {
+	client, _ := authorize(accessToken)
+
+	emailForwardInput, err := json.Marshal(map[string]string{"alias": alias, "forward": forward})
+	if err != nil {
+		fmt.Printf("Couldn't convert input to JSON, %v", err)
+		return false
+	}
+
+	resp, err := client.SetBody(emailForwardInput).Post(fmt.Sprintf("https://api.improvmx.com/v3/domains/%s/aliases", domain))
+	if err != nil {
+		fmt.Printf("Couldn't create email forward, got error %v", err)
+	}
+
+	fmt.Println(string(resp.Body()))
+	return true
+}
+
+func DeleteEmailForward(accessToken, domain, alias string) bool {
+	client, _ := authorize(accessToken)
+
+	resp, err := client.Delete(fmt.Sprintf("https://api.improvmx.com/v3/domains/%s/aliases/%s", domain, alias))
+	if err != nil {
+		fmt.Printf("Couldn't delete email forward, got error %v", err)
+	}
+
+	fmt.Println(string(resp.Body()))
+	return true
+}
