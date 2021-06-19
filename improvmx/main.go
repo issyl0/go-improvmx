@@ -42,7 +42,6 @@ func NewClient(accessToken string) *Client {
 func (client *Client) setHeaders() *resty.Request {
 	if client.AccessToken == "" {
 		fmt.Println("ERROR: An ImprovMX API access token is required. Create one at https://app.improvmx.com/api.")
-		return nil
 	}
 
 	return client.Http.SetAuthScheme("Basic").SetAuthToken(fmt.Sprintf("api:%s", client.AccessToken)).SetHeader("Content-Type", "application/json")
