@@ -27,6 +27,4 @@ func main() {
 ## TODO
 
 - [ ] Tests.
-- [ ] Better error handling.
-- [ ] Actual human output to the user, not just the JSON.
 - [ ] The future side project now this is done... a Terraform provider for ImprovMX email forwards.
