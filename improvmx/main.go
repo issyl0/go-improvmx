@@ -7,28 +7,25 @@ import (
 	resty "github.com/go-resty/resty/v2"
 )
 
-// https://improvmx.com/api/#domains-list data structure
-type Domains struct {
-	Success bool   `json:"success"`
-	Total   int    `json:"total"`
-	Error   string `json:"error"`
-	Domains []struct {
-		Name string `json:"domain"`
-	} `json:"domains"`
-}
-
-// https://improvmx.com/api/#account data structure
-type Account struct {
-	Success bool `json:"success"`
-	Account struct {
-		Premium bool `json:"premium"`
-	} `json:"account"`
-}
-
 type Client struct {
 	BaseURL     string
 	AccessToken string
 	Http        *resty.Request
+}
+
+type Response struct {
+	Success bool   `json:"success"`
+	Total   int    `json:"total"`
+	Code    int    `json:"code"`
+	Error   string `json:"error"`
+
+	Account struct {
+		Premium bool `json:"premium"`
+	} `json:"account"`
+
+	Domains []struct {
+		Name string `json:"domain"`
+	} `json:"domains"`
 }
 
 func NewClient(accessToken string) *Client {
@@ -51,17 +48,15 @@ func (client *Client) setHeaders() *resty.Request {
 // A (manual) test function to ensure a token is connected to an account.
 // TODO: More data fields.
 func (client *Client) AccountDetails() {
-	resp, err := client.setHeaders().Get(fmt.Sprintf("%s/account", client.BaseURL))
-	if err != nil {
-		fmt.Printf("That API key doesn't work: %v", err)
-		return
-	}
+	resp, _ := client.setHeaders().Get(fmt.Sprintf("%s/account", client.BaseURL))
 
-	parsedAccount := Account{}
-	json.Unmarshal(resp.Body(), &parsedAccount)
+	parsed := Response{}
+	json.Unmarshal(resp.Body(), &parsed)
 
-	if parsedAccount.Success {
-		fmt.Println(parsedAccount.Account.Premium)
+	if parsed.Success {
+		fmt.Println(parsed.Account.Premium)
+	} else {
+		fmt.Printf("ERROR: Couldn't find account details. Message: %v", parsed.Error)
 	}
 }
 
@@ -69,16 +64,16 @@ func (client *Client) AccountDetails() {
 func (client *Client) ListDomains() bool {
 	resp, _ := client.setHeaders().Get(fmt.Sprintf("%s/domains?limit=100", client.BaseURL))
 
-	parsedDomains := Domains{}
-	json.Unmarshal(resp.Body(), &parsedDomains)
+	parsed := Response{}
+	json.Unmarshal(resp.Body(), &parsed)
 
-	if parsedDomains.Success {
-		for _, domain := range parsedDomains.Domains {
+	if parsed.Success {
+		for _, domain := range parsed.Domains {
 			fmt.Println(domain.Name)
 		}
 		return true
 	} else {
-		fmt.Printf("ERROR: Couldn't get domains, the problem was: %s", parsedDomains.Error)
+		fmt.Printf("ERROR: Couldn't get domains. Message: %s", parsed.Error)
 		return false
 	}
 }
@@ -91,28 +86,34 @@ func (client *Client) CreateDomain(domain string) bool {
 		return false
 	}
 
-	resp, err := client.setHeaders().SetBody(domainInput).Post(fmt.Sprintf("%s/domains/", client.BaseURL))
-	// TODO: `err` here isn't actually the API response error, they're still in `resp`.
-	if err != nil {
-		fmt.Printf("%v", err)
+	resp, _ := client.setHeaders().SetBody(domainInput).Post(fmt.Sprintf("%s/domains/", client.BaseURL))
+
+	parsed := Response{}
+	json.Unmarshal(resp.Body(), &parsed)
+
+	if parsed.Success {
+		fmt.Printf("SUCCESS: Domain %s created.", domain)
+		return true
+	} else {
+		fmt.Printf("ERROR: Couldn't create domain. Message: %s", parsed.Error)
 		return false
 	}
-
-	fmt.Println(string(resp.Body()))
-	return true
 }
 
 // https://improvmx.com/api/#domain-delete
 func (client *Client) DeleteDomain(domain string) bool {
-	resp, err := client.setHeaders().Delete(fmt.Sprintf("%s/domains/%s", client.BaseURL, domain))
-	// TODO: `err` here isn't actually the API response error, they're still in `resp`.
-	if err != nil {
-		fmt.Printf("Couldn't delete domain, got error %v", err)
+	resp, _ := client.setHeaders().Delete(fmt.Sprintf("%s/domains/%s", client.BaseURL, domain))
+
+	parsed := Response{}
+	json.Unmarshal(resp.Body(), &parsed)
+
+	if parsed.Success {
+		fmt.Printf("SUCCESS: Domain %s and all its forwards deleted.", domain)
+		return true
+	} else {
+		fmt.Printf("ERROR: Couldn't delete domain. Message: %s", parsed.Error)
 		return false
 	}
-
-	fmt.Println(string(resp.Body()))
-	return true
 }
 
 // https://improvmx.com/api/#alias-add
@@ -123,24 +124,32 @@ func (client *Client) CreateEmailForward(domain, alias, forward string) bool {
 		return false
 	}
 
-	resp, err := client.setHeaders().SetBody(emailForwardInput).Post(fmt.Sprintf("%s/domains/%s/aliases", client.BaseURL, domain))
-	// TODO: `err` here isn't actually the API response error, they're still in `resp`.
-	if err != nil {
-		fmt.Printf("Couldn't create email forward, got error %v", err)
-	}
+	resp, _ := client.setHeaders().SetBody(emailForwardInput).Post(fmt.Sprintf("%s/domains/%s/aliases", client.BaseURL, domain))
 
-	fmt.Println(string(resp.Body()))
-	return true
+	parsed := Response{}
+	json.Unmarshal(resp.Body(), &parsed)
+
+	if parsed.Success {
+		fmt.Printf("SUCCESS: Created email forward from %s@%s to %s.", alias, domain, forward)
+		return true
+	} else {
+		fmt.Printf("ERROR: Couldn't create email forward. Message: %s", parsed.Error)
+		return false
+	}
 }
 
 // https://improvmx.com/api/#alias-delete
 func (client *Client) DeleteEmailForward(domain, alias string) bool {
-	resp, err := client.setHeaders().Delete(fmt.Sprintf("%s/domains/%s/aliases/%s", client.BaseURL, domain, alias))
-	// TODO: `err` here isn't actually the API response error, they're still in `resp`.
-	if err != nil {
-		fmt.Printf("Couldn't delete email forward, got error %v", err)
-	}
+	resp, _ := client.setHeaders().Delete(fmt.Sprintf("%s/domains/%s/aliases/%s", client.BaseURL, domain, alias))
 
-	fmt.Println(string(resp.Body()))
-	return true
+	parsed := Response{}
+	json.Unmarshal(resp.Body(), &parsed)
+
+	if parsed.Success {
+		fmt.Printf("SUCCESS: Deleted email forward %s@%s.", alias, domain)
+		return true
+	} else {
+		fmt.Printf("ERROR: Couldn't delete email forward. Message: %s", parsed.Error)
+		return false
+	}
 }
