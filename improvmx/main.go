@@ -9,8 +9,9 @@ import (
 
 // https://improvmx.com/api/#domains-list data structure
 type Domains struct {
-	Success bool `json:"success"`
-	Total   int  `json:"total"`
+	Success bool   `json:"success"`
+	Total   int    `json:"total"`
+	Error   string `json:"error"`
 	Domains []struct {
 		Name string `json:"domain"`
 	} `json:"domains"`
@@ -32,7 +33,7 @@ type Client struct {
 
 func NewClient(accessToken string) *Client {
 	return &Client{
-		BaseURL:     "https://api.improvmx.com/api/v3",
+		BaseURL:     "https://api.improvmx.com/v3",
 		AccessToken: accessToken,
 		Http:        resty.New().R(),
 	}
@@ -66,19 +67,20 @@ func (client *Client) AccountDetails() {
 
 // https://improvmx.com/api/#domains-list
 func (client *Client) ListDomains() bool {
-	resp, err := client.setHeaders().Get(fmt.Sprintf("%s/domains?limit=100", client.BaseURL))
-	if err != nil {
-		fmt.Printf("ERROR: Couldn't get domains. %v", err)
-		return false
-	}
+	resp, _ := client.setHeaders().Get(fmt.Sprintf("%s/domains?limit=100", client.BaseURL))
 
 	parsedDomains := Domains{}
 	json.Unmarshal(resp.Body(), &parsedDomains)
 
-	for _, domain := range parsedDomains.Domains {
-		fmt.Println(domain.Name)
+	if parsedDomains.Success {
+		for _, domain := range parsedDomains.Domains {
+			fmt.Println(domain.Name)
+		}
+		return true
+	} else {
+		fmt.Printf("ERROR: Couldn't get domains, the problem was: %s", parsedDomains.Error)
+		return false
 	}
-	return true
 }
 
 // https://improvmx.com/api/#domains-add
