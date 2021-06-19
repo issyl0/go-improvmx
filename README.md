@@ -19,7 +19,6 @@ func main() {
 	client.ListDomains()
 	client.CreateDomain("example.com")
 	client.CreateEmailForward("example.com", "hi", "hi@realdomain.com")
-	client.CreateEmailForward("example.com", "hi", "hi@realdomain.com")
 	client.DeleteEmailForward("example.com", "hi")
 	client.DeleteDomain("example.com")
 }
