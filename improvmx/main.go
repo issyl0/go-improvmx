@@ -39,21 +39,19 @@ func NewClient(accessToken string) *Client {
 }
 
 // https://improvmx.com/api/#authentication handler
-func (c *Client) setHeaders() *resty.Request {
-	if c.AccessToken == "" {
+func (client *Client) setHeaders() *resty.Request {
+	if client.AccessToken == "" {
 		fmt.Println("ERROR: An ImprovMX API access token is required. Create one at https://app.improvmx.com/api.")
 		return nil
 	}
 
-	client := c.Http.SetAuthScheme("Basic").SetAuthToken(fmt.Sprintf("api:%s", c.AccessToken)).SetHeader("Content-Type", "application/json")
-
-	return client
+	return client.Http.SetAuthScheme("Basic").SetAuthToken(fmt.Sprintf("api:%s", client.AccessToken)).SetHeader("Content-Type", "application/json")
 }
 
 // A (manual) test function to ensure a token is connected to an account.
 // TODO: More data fields.
 func (client *Client) AccountDetails() {
-	resp, err := client.setHeaders().Get("https://api.improvmx.com/v3/account")
+	resp, err := client.setHeaders().Get(fmt.Sprintf("%s/account", client.BaseURL))
 	if err != nil {
 		fmt.Printf("That API key doesn't work: %v", err)
 		return
@@ -69,7 +67,7 @@ func (client *Client) AccountDetails() {
 
 // https://improvmx.com/api/#domains-list
 func (client *Client) ListDomains() bool {
-	resp, err := client.setHeaders().Get("https://api.improvmx.com/v3/domains?limit=100")
+	resp, err := client.setHeaders().Get(fmt.Sprintf("%s/domains?limit=100", client.BaseURL))
 	if err != nil {
 		fmt.Printf("ERROR: Couldn't get domains. %v", err)
 		return false
@@ -92,7 +90,7 @@ func (client *Client) CreateDomain(domain string) bool {
 		return false
 	}
 
-	resp, err := client.setHeaders().SetBody(domainInput).Post("https://api.improvmx.com/v3/domains/")
+	resp, err := client.setHeaders().SetBody(domainInput).Post(fmt.Sprintf("%s/domains/", client.BaseURL))
 	// TODO: `err` here isn't actually the API response error, they're still in `resp`.
 	if err != nil {
 		fmt.Printf("%v", err)
@@ -105,7 +103,7 @@ func (client *Client) CreateDomain(domain string) bool {
 
 // https://improvmx.com/api/#domain-delete
 func (client *Client) DeleteDomain(domain string) bool {
-	resp, err := client.setHeaders().Delete(fmt.Sprintf("https://api.improvmx.com/v3/domains/%s", domain))
+	resp, err := client.setHeaders().Delete(fmt.Sprintf("%s/domains/%s", client.BaseURL, domain))
 	// TODO: `err` here isn't actually the API response error, they're still in `resp`.
 	if err != nil {
 		fmt.Printf("Couldn't delete domain, got error %v", err)
@@ -124,7 +122,7 @@ func (client *Client) CreateEmailForward(domain, alias, forward string) bool {
 		return false
 	}
 
-	resp, err := client.setHeaders().SetBody(emailForwardInput).Post(fmt.Sprintf("https://api.improvmx.com/v3/domains/%s/aliases", domain))
+	resp, err := client.setHeaders().SetBody(emailForwardInput).Post(fmt.Sprintf("%s/domains/%s/aliases", client.BaseURL, domain))
 	// TODO: `err` here isn't actually the API response error, they're still in `resp`.
 	if err != nil {
 		fmt.Printf("Couldn't create email forward, got error %v", err)
@@ -136,7 +134,7 @@ func (client *Client) CreateEmailForward(domain, alias, forward string) bool {
 
 // https://improvmx.com/api/#alias-delete
 func (client *Client) DeleteEmailForward(domain, alias string) bool {
-	resp, err := client.setHeaders().Delete(fmt.Sprintf("https://api.improvmx.com/v3/domains/%s/aliases/%s", domain, alias))
+	resp, err := client.setHeaders().Delete(fmt.Sprintf("%s/domains/%s/aliases/%s", client.BaseURL, domain, alias))
 	// TODO: `err` here isn't actually the API response error, they're still in `resp`.
 	if err != nil {
 		fmt.Printf("Couldn't delete email forward, got error %v", err)
