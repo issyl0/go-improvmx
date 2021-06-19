@@ -15,6 +15,7 @@ import (
 
 func main() {
 	client := improvmx.NewClient(os.Getenv("IMPROVMX_API_TOKEN"))
+	client.AccountDetails()
 	client.ListDomains()
 	client.CreateDomain("example.com")
 	client.CreateEmailForward("example.com", "hi", "hi@realdomain.com")

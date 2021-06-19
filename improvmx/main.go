@@ -20,7 +20,9 @@ type Response struct {
 	Error   string `json:"error"`
 
 	Account struct {
-		Premium bool `json:"premium"`
+		Plan struct {
+			Display string `json:"display"`
+		}
 	} `json:"account"`
 
 	Domains []struct {
@@ -45,8 +47,7 @@ func (client *Client) setHeaders() *resty.Request {
 	return client.Http.SetAuthScheme("Basic").SetAuthToken(fmt.Sprintf("api:%s", client.AccessToken)).SetHeader("Content-Type", "application/json")
 }
 
-// A (manual) test function to ensure a token is connected to an account.
-// TODO: More data fields.
+// https://improvmx.com/api/#account handler
 func (client *Client) AccountDetails() {
 	resp, _ := client.setHeaders().Get(fmt.Sprintf("%s/account", client.BaseURL))
 
@@ -54,9 +55,9 @@ func (client *Client) AccountDetails() {
 	json.Unmarshal(resp.Body(), &parsed)
 
 	if parsed.Success {
-		fmt.Println(parsed.Account.Premium)
+		fmt.Printf("You're on the %s tier of ImprovMX.\n", parsed.Account.Plan.Display)
 	} else {
-		fmt.Printf("ERROR: Couldn't find account details. Message: %v", parsed.Error)
+		fmt.Printf("ERROR: Couldn't find account details. Message: %v\n", parsed.Error)
 	}
 }
 
@@ -82,7 +83,7 @@ func (client *Client) ListDomains() bool {
 func (client *Client) CreateDomain(domain string) bool {
 	domainInput, err := json.Marshal(map[string]string{"domain": domain})
 	if err != nil {
-		fmt.Printf("Couldn't convert string to JSON: %v", err)
+		fmt.Printf("Couldn't convert string to JSON: %v\n", err)
 		return false
 	}
 
@@ -92,10 +93,10 @@ func (client *Client) CreateDomain(domain string) bool {
 	json.Unmarshal(resp.Body(), &parsed)
 
 	if parsed.Success {
-		fmt.Printf("SUCCESS: Domain %s created.", domain)
+		fmt.Printf("SUCCESS: Domain %s created.\n", domain)
 		return true
 	} else {
-		fmt.Printf("ERROR: Couldn't create domain. Message: %s", parsed.Error)
+		fmt.Printf("ERROR: Couldn't create domain. Message: %s\n", parsed.Error)
 		return false
 	}
 }
@@ -108,10 +109,10 @@ func (client *Client) DeleteDomain(domain string) bool {
 	json.Unmarshal(resp.Body(), &parsed)
 
 	if parsed.Success {
-		fmt.Printf("SUCCESS: Domain %s and all its forwards deleted.", domain)
+		fmt.Printf("SUCCESS: Domain %s and all its forwards deleted.\n", domain)
 		return true
 	} else {
-		fmt.Printf("ERROR: Couldn't delete domain. Message: %s", parsed.Error)
+		fmt.Printf("ERROR: Couldn't delete domain. Message: %s\n", parsed.Error)
 		return false
 	}
 }
@@ -130,10 +131,10 @@ func (client *Client) CreateEmailForward(domain, alias, forward string) bool {
 	json.Unmarshal(resp.Body(), &parsed)
 
 	if parsed.Success {
-		fmt.Printf("SUCCESS: Created email forward from %s@%s to %s.", alias, domain, forward)
+		fmt.Printf("SUCCESS: Created email forward from %s@%s to %s.\n", alias, domain, forward)
 		return true
 	} else {
-		fmt.Printf("ERROR: Couldn't create email forward. Message: %s", parsed.Error)
+		fmt.Printf("ERROR: Couldn't create email forward. Message: %s\n", parsed.Error)
 		return false
 	}
 }
@@ -146,10 +147,10 @@ func (client *Client) DeleteEmailForward(domain, alias string) bool {
 	json.Unmarshal(resp.Body(), &parsed)
 
 	if parsed.Success {
-		fmt.Printf("SUCCESS: Deleted email forward %s@%s.", alias, domain)
+		fmt.Printf("SUCCESS: Deleted email forward %s@%s.\n", alias, domain)
 		return true
 	} else {
-		fmt.Printf("ERROR: Couldn't delete email forward. Message: %s", parsed.Error)
+		fmt.Printf("ERROR: Couldn't delete email forward. Message: %s\n", parsed.Error)
 		return false
 	}
 }
