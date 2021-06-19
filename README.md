@@ -14,18 +14,18 @@ import (
 )
 
 func main() {
-	accessToken := os.Getenv("IMPROVMX_API_TOKEN")
-	improvmx.ListDomains(accessToken)
-	improvmx.CreateDomain(accessToken, "example.com")
-	improvmx.CreateEmailForward(accessToken, "example.com", "hi", "me@realdomain.com")
-	improvmx.DeleteEmailForward(accessToken, "example.com", "hi")
-	improvmx.DeleteDomain(accessToken, "example.com")
+	client := improvmx.NewClient(os.Getenv("IMPROVMX_API_TOKEN"))
+	client.ListDomains()
+	client.CreateDomain("example.com")
+	client.CreateEmailForward("example.com", "hi", "hi@realdomain.com")
+	client.CreateEmailForward("example.com", "hi", "hi@realdomain.com")
+	client.DeleteEmailForward("example.com", "hi")
+	client.DeleteDomain("example.com")
 }
 ```
 
 ## TODO
 
-- [ ] Avoid making users pass `accessToken` on every operation.
 - [ ] Tests.
 - [ ] Better error handling.
 - [ ] Actual human output to the user, not just the JSON.
