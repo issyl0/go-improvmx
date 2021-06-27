@@ -37,9 +37,8 @@ type Response struct {
 	} `json:"alias"`
 
 	Domain struct {
-		Domain     string `json:"domain"`
-		Whitelabel string `json:"whitelabel"`
-		Id         int64  `json:"id"`
+		Domain string `json:"domain"`
+		Id     int64  `json:"id"`
 	} `json:"domain"`
 }
 
