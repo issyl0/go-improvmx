@@ -36,7 +36,7 @@ type Response struct {
 		Id      int64  `json:"id"`
 	} `json:"alias"`
 
-	Domain []struct {
+	Domain struct {
 		Domain     string `json:"domain"`
 		Whitelabel string `json:"whitelabel"`
 		Id         int64  `json:"id"`
