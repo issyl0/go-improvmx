@@ -22,11 +22,6 @@ func main() {
 		fmt.Println(err)
 	}
 
-	_, err = client.ListDomains()
-	if err != "" {
-		fmt.Println(err)
-	}
-
 	_, err = client.CreateDomain("example.com")
 	if err != "" {
 		fmt.Println(err)
