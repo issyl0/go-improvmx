@@ -73,23 +73,6 @@ func (client *Client) AccountDetails() (bool, string) {
 	}
 }
 
-// https://improvmx.com/api/#domains-list
-func (client *Client) ListDomains() (bool, string) {
-	resp, _ := client.setHeaders().Get(fmt.Sprintf("%s/domains?limit=100", client.BaseURL))
-
-	parsed := Response{}
-	json.Unmarshal(resp.Body(), &parsed)
-
-	if parsed.Success {
-		for _, domain := range parsed.Domains {
-			fmt.Println(domain.Name)
-		}
-		return true, ""
-	} else {
-		return false, parsed.Errors.Domain[0]
-	}
-}
-
 func (client *Client) GetDomain(domain string) Response {
 	resp, _ := client.setHeaders().Get(fmt.Sprintf("%s/domains/%s", client.BaseURL, domain))
 
@@ -125,11 +108,7 @@ func (client *Client) DeleteDomain(domain string) (bool, string) {
 	parsed := Response{}
 	json.Unmarshal(resp.Body(), &parsed)
 
-	if parsed.Success {
-		return true, ""
-	} else {
-		return false, parsed.Errors.Domain[0]
-	}
+	return parsed.Success, ""
 }
 
 // https://improvmx.com/api/#alias-add
@@ -167,9 +146,5 @@ func (client *Client) DeleteEmailForward(domain, alias string) (bool, string) {
 	parsed := Response{}
 	json.Unmarshal(resp.Body(), &parsed)
 
-	if parsed.Success {
-		return true, ""
-	} else {
-		return false, parsed.Errors.Alias[0]
-	}
+	return parsed.Success, ""
 }
