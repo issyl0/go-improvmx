@@ -30,6 +30,12 @@ type Response struct {
 		} `json:"plan"`
 	} `json:"account"`
 
+	Aliases []struct {
+		Forward string `json:"forward"`
+		Alias   string `json:"alias"`
+		Id      string `json:"id"`
+	} `json:"aliases"`
+
 	Domains []struct {
 		Name string `json:"domain"`
 	} `json:"domains"`
@@ -133,6 +139,19 @@ func (client *Client) CreateEmailForward(domain, alias, forward string) (bool, s
 		return true, ""
 	} else {
 		return false, parsed.Errors.Alias[0]
+	}
+}
+
+func (client *Client) GetEmailForward(domain string) (string, string) {
+	resp, _ := client.setHeaders().Get(fmt.Sprintf("%s/domains/%s/aliases", client.BaseURL, domain))
+
+	parsed := Response{}
+	json.Unmarshal(resp.Body(), &parsed)
+
+	if parsed.Success {
+		return string(resp.Body()), ""
+	} else {
+		return "", parsed.Errors.Domain[0]
 	}
 }
 
