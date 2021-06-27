@@ -37,8 +37,10 @@ type Response struct {
 	} `json:"alias"`
 
 	Domain struct {
-		Domain string `json:"domain"`
-		Id     int64  `json:"id"`
+		Domain  string `json:"domain"`
+		Aliases []struct {
+			Id int64 `json:"id`
+		}
 	} `json:"domain"`
 }
 
@@ -84,51 +86,37 @@ func (client *Client) GetDomain(domain string) Response {
 }
 
 // https://improvmx.com/api/#domains-add
-func (client *Client) CreateDomain(domain string) (bool, string) {
-	domainInput, err := json.Marshal(map[string]string{"domain": domain})
-	if err != nil {
-		return false, fmt.Sprintf("Couldn't convert string to JSON: %v\n", err)
-	}
+func (client *Client) CreateDomain(domain string) Response {
+	domainInput, _ := json.Marshal(map[string]string{"domain": domain})
 
 	resp, _ := client.setHeaders().SetBody(domainInput).Post(fmt.Sprintf("%s/domains/", client.BaseURL))
 
 	parsed := Response{}
 	json.Unmarshal(resp.Body(), &parsed)
 
-	if parsed.Success {
-		return true, ""
-	} else {
-		return false, parsed.Errors.Domain[0]
-	}
+	return parsed
 }
 
 // https://improvmx.com/api/#domain-delete
-func (client *Client) DeleteDomain(domain string) (bool, string) {
+func (client *Client) DeleteDomain(domain string) Response {
 	resp, _ := client.setHeaders().Delete(fmt.Sprintf("%s/domains/%s", client.BaseURL, domain))
 
 	parsed := Response{}
 	json.Unmarshal(resp.Body(), &parsed)
 
-	return parsed.Success, ""
+	return parsed
 }
 
 // https://improvmx.com/api/#alias-add
-func (client *Client) CreateEmailForward(domain, alias, forward string) (bool, string) {
-	emailForwardInput, err := json.Marshal(map[string]string{"alias": alias, "forward": forward})
-	if err != nil {
-		return false, fmt.Sprintf("Couldn't convert input to JSON, %v", err)
-	}
+func (client *Client) CreateEmailForward(domain, alias, forward string) Response {
+	emailForwardInput, _ := json.Marshal(map[string]string{"alias": alias, "forward": forward})
 
 	resp, _ := client.setHeaders().SetBody(emailForwardInput).Post(fmt.Sprintf("%s/domains/%s/aliases", client.BaseURL, domain))
 
 	parsed := Response{}
 	json.Unmarshal(resp.Body(), &parsed)
 
-	if parsed.Success {
-		return true, ""
-	} else {
-		return false, parsed.Errors.Alias[0]
-	}
+	return parsed
 }
 
 func (client *Client) GetEmailForward(domain, alias string) Response {
@@ -141,11 +129,11 @@ func (client *Client) GetEmailForward(domain, alias string) Response {
 }
 
 // https://improvmx.com/api/#alias-delete
-func (client *Client) DeleteEmailForward(domain, alias string) (bool, string) {
+func (client *Client) DeleteEmailForward(domain, alias string) Response {
 	resp, _ := client.setHeaders().Delete(fmt.Sprintf("%s/domains/%s/aliases/%s", client.BaseURL, domain, alias))
 
 	parsed := Response{}
 	json.Unmarshal(resp.Body(), &parsed)
 
-	return parsed.Success, ""
+	return parsed
 }
