@@ -36,15 +36,9 @@ type Response struct {
 		Id      int64  `json:"id"`
 	} `json:"alias"`
 
-	Aliases []struct {
-		Forward string `json:"forward"`
-		Alias   string `json:"alias"`
-		Id      string `json:"id"`
-	} `json:"aliases"`
-
-	Domains []struct {
-		Name string `json:"domain"`
-	} `json:"domains"`
+	Domain []struct {
+		Domain string `json:"domain"`
+	}
 }
 
 func NewClient(accessToken string) *Client {
@@ -94,6 +88,15 @@ func (client *Client) ListDomains() (bool, string) {
 	} else {
 		return false, parsed.Errors.Domain[0]
 	}
+}
+
+func (client *Client) GetDomain(domain string) Response {
+	resp, _ := client.setHeaders().Get(fmt.Sprintf("%s/domains/%s", client.BaseURL, domain))
+
+	parsed := Response{}
+	json.Unmarshal(resp.Body(), &parsed)
+
+	return parsed
 }
 
 // https://improvmx.com/api/#domains-add
