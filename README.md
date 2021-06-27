@@ -8,6 +8,7 @@ A Golang API client for [ImprovMX](https://improvmx.com), my email forwarding se
 package main
 
 import (
+	"fmt"
 	"os"
 
 	improvmx "github.com/issyl0/go-improvmx"
@@ -15,12 +16,35 @@ import (
 
 func main() {
 	client := improvmx.NewClient(os.Getenv("IMPROVMX_API_TOKEN"))
-	client.AccountDetails()
-	client.ListDomains()
-	client.CreateDomain("example.com")
-	client.CreateEmailForward("example.com", "hi", "hi@realdomain.com")
-	client.DeleteEmailForward("example.com", "hi")
-	client.DeleteDomain("example.com")
+	_, err := client.AccountDetails()
+	if err != "" {
+		fmt.Println(err)
+	}
+
+	_, err := client.ListDomains()
+	if err != "" {
+		fmt.Println(err)
+	}
+
+	_, err := client.CreateDomain("example.com")
+	if err != "" {
+		fmt.Println(err)
+	}
+
+	_, err = client.CreateEmailForward("example.com", "hi", "hi@realdomain.com")
+	if err != "" {
+		fmt.Println(err)
+	}
+
+	_, err := client.DeleteEmailForward("example.com", "hi")
+	if err != "" {
+		fmt.Println(err)
+	}
+
+	_, err := client.DeleteDomain("example.com")
+	if err != "" {
+		fmt.Println(err)
+	}
 }
 ```
 
