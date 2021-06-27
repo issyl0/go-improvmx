@@ -30,6 +30,12 @@ type Response struct {
 		} `json:"plan"`
 	} `json:"account"`
 
+	Alias struct {
+		Forward string `json:"forward"`
+		Alias   string `json:"alias"`
+		Id      int64  `json:"id"`
+	} `json:"alias"`
+
 	Aliases []struct {
 		Forward string `json:"forward"`
 		Alias   string `json:"alias"`
@@ -142,17 +148,13 @@ func (client *Client) CreateEmailForward(domain, alias, forward string) (bool, s
 	}
 }
 
-func (client *Client) GetEmailForward(domain string) (string, string) {
-	resp, _ := client.setHeaders().Get(fmt.Sprintf("%s/domains/%s/aliases", client.BaseURL, domain))
+func (client *Client) GetEmailForward(domain, alias string) Response {
+	resp, _ := client.setHeaders().Get(fmt.Sprintf("%s/domains/%s/aliases/%s", client.BaseURL, domain, alias))
 
 	parsed := Response{}
 	json.Unmarshal(resp.Body(), &parsed)
 
-	if parsed.Success {
-		return string(resp.Body()), ""
-	} else {
-		return "", parsed.Errors.Domain[0]
-	}
+	return parsed
 }
 
 // https://improvmx.com/api/#alias-delete
