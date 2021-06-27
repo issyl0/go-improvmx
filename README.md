@@ -10,7 +10,7 @@ package main
 import (
 	"os"
 
-	"github.com/issyl0/go-improvmx/improvmx"
+	improvmx "github.com/issyl0/go-improvmx"
 )
 
 func main() {
