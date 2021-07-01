@@ -37,8 +37,10 @@ type Response struct {
 	} `json:"alias"`
 
 	Domain struct {
-		Domain  string `json:"domain"`
-		Aliases []struct {
+		Domain            string `json:"domain"`
+		Whitelabel        string `json:"whitelabel"`
+		NotificationEmail string `json:"notification_email"`
+		Aliases           []struct {
 			Id int64 `json:"id"`
 		}
 	} `json:"domain"`
@@ -82,10 +84,25 @@ func (client *Client) GetDomain(domain string) Response {
 }
 
 // https://improvmx.com/api/#domains-add
-func (client *Client) CreateDomain(domain string) Response {
-	domainInput, _ := json.Marshal(map[string]string{"domain": domain})
+func (client *Client) CreateDomain(domain, notificationEmail, whitelabel string) Response {
+	domainInput, _ := json.Marshal(map[string]string{"notification_email": notificationEmail})
 
 	resp, _ := client.setHeaders().SetBody(domainInput).Post(fmt.Sprintf("%s/domains/", client.BaseURL))
+
+	parsed := Response{}
+	json.Unmarshal(resp.Body(), &parsed)
+
+	return parsed
+}
+
+func (client *Client) UpdateDomain(domain, notificationEmail, whitelabel string) Response {
+	domainInput, _ := json.Marshal(map[string]string{
+		"domain":             domain,
+		"notification_email": notificationEmail,
+		"whitelabel":         whitelabel,
+	})
+
+	resp, _ := client.setHeaders().SetBody(domainInput).Put(fmt.Sprintf("%s/domains/%s", client.BaseURL, domain))
 
 	parsed := Response{}
 	json.Unmarshal(resp.Body(), &parsed)
