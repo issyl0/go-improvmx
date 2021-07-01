@@ -39,7 +39,7 @@ type Response struct {
 	Domain struct {
 		Domain  string `json:"domain"`
 		Aliases []struct {
-			Id int64 `json:"id`
+			Id int64 `json:"id"`
 		}
 	} `json:"domain"`
 }
@@ -63,17 +63,13 @@ func (client *Client) setHeaders() *resty.Request {
 }
 
 // https://improvmx.com/api/#account handler
-func (client *Client) AccountDetails() (bool, string) {
+func (client *Client) AccountDetails() Response {
 	resp, _ := client.setHeaders().Get(fmt.Sprintf("%s/account", client.BaseURL))
 
 	parsed := Response{}
 	json.Unmarshal(resp.Body(), &parsed)
 
-	if parsed.Success {
-		return true, ""
-	} else {
-		return false, parsed.Errors.Account[0]
-	}
+	return parsed
 }
 
 func (client *Client) GetDomain(domain string) Response {
@@ -121,6 +117,16 @@ func (client *Client) CreateEmailForward(domain, alias, forward string) Response
 
 func (client *Client) GetEmailForward(domain, alias string) Response {
 	resp, _ := client.setHeaders().Get(fmt.Sprintf("%s/domains/%s/aliases/%s", client.BaseURL, domain, alias))
+
+	parsed := Response{}
+	json.Unmarshal(resp.Body(), &parsed)
+
+	return parsed
+}
+
+func (client *Client) UpdateEmailForward(domain, alias, forward string) Response {
+	emailForwardInput, _ := json.Marshal(map[string]string{"forward": forward})
+	resp, _ := client.setHeaders().SetBody(emailForwardInput).Put(fmt.Sprintf("%s/domains/%s/aliases/%s", client.BaseURL, domain, alias))
 
 	parsed := Response{}
 	json.Unmarshal(resp.Body(), &parsed)
