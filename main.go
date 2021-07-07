@@ -85,7 +85,11 @@ func (client *Client) GetDomain(domain string) Response {
 
 // https://improvmx.com/api/#domains-add
 func (client *Client) CreateDomain(domain, notificationEmail, whitelabel string) Response {
-	domainInput, _ := json.Marshal(map[string]string{"notification_email": notificationEmail})
+	domainInput, _ := json.Marshal(map[string]string{
+		"domain":             domain,
+		"notification_email": notificationEmail,
+		"whitelabel":         whitelabel,
+	})
 
 	resp, _ := client.setHeaders().SetBody(domainInput).Post(fmt.Sprintf("%s/domains/", client.BaseURL))
 
