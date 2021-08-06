@@ -44,6 +44,18 @@ type Response struct {
 			Id int64 `json:"id"`
 		}
 	} `json:"domain"`
+
+	Credential struct {
+		Created  int64  `json:"created"`
+		Usage    int    `json:"usage"`
+		Username string `json:"username"`
+	} `json:"credential"`
+
+	Credentials []struct {
+		Created  int64  `json:"created"`
+		Usage    int    `json:"usage"`
+		Username string `json:"username"`
+	} `json:"credentials"`
 }
 
 func NewClient(accessToken string) *Client {
@@ -158,6 +170,44 @@ func (client *Client) UpdateEmailForward(domain, alias, forward string) Response
 // https://improvmx.com/api/#alias-delete
 func (client *Client) DeleteEmailForward(domain, alias string) Response {
 	resp, _ := client.setHeaders().Delete(fmt.Sprintf("%s/domains/%s/aliases/%s", client.BaseURL, domain, alias))
+
+	parsed := Response{}
+	json.Unmarshal(resp.Body(), &parsed)
+
+	return parsed
+}
+
+func (client *Client) GetSMTPCredential(domain string) Response {
+	resp, _ := client.setHeaders().Get(fmt.Sprintf("%s/domains/%s/credentials", client.BaseURL, domain))
+
+	parsed := Response{}
+	json.Unmarshal(resp.Body(), &parsed)
+
+	return parsed
+}
+
+func (client *Client) CreateSMTPCredential(domain, username, password string) Response {
+	credentialsInput, _ := json.Marshal(map[string]string{"username": username, "password": password})
+	resp, _ := client.setHeaders().SetBody(credentialsInput).Post(fmt.Sprintf("%s/domains/%s/credentials", client.BaseURL, domain))
+
+	parsed := Response{}
+	json.Unmarshal(resp.Body(), &parsed)
+
+	return parsed
+}
+
+func (client *Client) UpdateSMTPCredential(domain, username, password string) Response {
+	credentialsInput, _ := json.Marshal(map[string]string{"password": password})
+	resp, _ := client.setHeaders().SetBody(credentialsInput).Put(fmt.Sprintf("%s/domains/%s/credentials/%s", client.BaseURL, domain, username))
+
+	parsed := Response{}
+	json.Unmarshal(resp.Body(), &parsed)
+
+	return parsed
+}
+
+func (client *Client) DeleteSMTPCredential(domain, username string) Response {
+	resp, _ := client.setHeaders().Delete(fmt.Sprintf("%s/domains/%s/credentials/%s", client.BaseURL, domain, username))
 
 	parsed := Response{}
 	json.Unmarshal(resp.Body(), &parsed)
