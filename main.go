@@ -24,6 +24,8 @@ type Response struct {
 		Account []string `json:"account"`
 	} `json:"errors"`
 
+	Error string `json:"error"`
+
 	Records struct {
 		Valid    bool   `json:"valid"`
 		Provider string `json:"provider"`
