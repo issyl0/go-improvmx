@@ -24,6 +24,22 @@ type Response struct {
 		Account []string `json:"account"`
 	} `json:"errors"`
 
+	Records struct {
+		Valid    bool   `json:"valid"`
+		Provider string `json:"provider"`
+		Advanced bool   `json:"advanced"`
+		Mx       struct {
+			Valid    bool     `json:"valid"`
+			Expected []string `json:"expected"`
+			Values   []string `json:"values"`
+		} `json:"mx"`
+		Spf struct {
+			Valid    bool   `json:"valid"`
+			Expected string `json:"expected"`
+			Values   string `json:"values"`
+		} `json:"spf"`
+	}
+
 	Account struct {
 		Plan struct {
 			Display string `json:"display"`
