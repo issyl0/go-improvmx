@@ -136,7 +136,15 @@ func (client *Client) DeleteDomain(domain string) Response {
 	return parsed
 }
 
-// https://improvmx.com/api/#alias-add
+func (client *Client) GetDomainCheck(domain string) Response {
+	resp, _ := client.setHeaders().Get(fmt.Sprintf("%s/domains/%s/check", client.BaseURL, domain))
+
+	parsed := Response{}
+	json.Unmarshal(resp.Body(), &parsed)
+
+	return parsed
+}
+
 func (client *Client) CreateEmailForward(domain, alias, forward string) Response {
 	emailForwardInput, _ := json.Marshal(map[string]string{"alias": alias, "forward": forward})
 
