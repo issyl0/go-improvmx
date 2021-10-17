@@ -24,6 +24,24 @@ type Response struct {
 		Account []string `json:"account"`
 	} `json:"errors"`
 
+	Error string `json:"error"`
+
+	Records struct {
+		Valid    bool   `json:"valid"`
+		Provider string `json:"provider"`
+		Advanced bool   `json:"advanced"`
+		Mx       struct {
+			Valid    bool     `json:"valid"`
+			Expected []string `json:"expected"`
+			Values   []string `json:"values"`
+		} `json:"mx"`
+		Spf struct {
+			Valid    bool   `json:"valid"`
+			Expected string `json:"expected"`
+			Values   string `json:"values"`
+		} `json:"spf"`
+	}
+
 	Account struct {
 		Plan struct {
 			Display string `json:"display"`
@@ -136,7 +154,15 @@ func (client *Client) DeleteDomain(domain string) Response {
 	return parsed
 }
 
-// https://improvmx.com/api/#alias-add
+func (client *Client) GetDomainCheck(domain string) Response {
+	resp, _ := client.setHeaders().Get(fmt.Sprintf("%s/domains/%s/check", client.BaseURL, domain))
+
+	parsed := Response{}
+	json.Unmarshal(resp.Body(), &parsed)
+
+	return parsed
+}
+
 func (client *Client) CreateEmailForward(domain, alias, forward string) Response {
 	emailForwardInput, _ := json.Marshal(map[string]string{"alias": alias, "forward": forward})
 
